@@ -1,5 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import { generateResponse } from './ollama.js';
 dotenv.config();
 
 const app = express();
@@ -10,12 +11,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Rota principal
-app.get('/', (req, res) => {
-  res.json({
-    message: 'Servidor Express está rodando com sucesso!',
-    status: 'online',
-    timestamp: new Date().toISOString()
-  });
+app.post('/api/chat', async (req, res) => {
+  const { message } = req.body;
+  if (!message) {
+    return res.status(400).json({ error: 'Mensagem não fornecida' });
+  }
+  const response = await generateResponse(message);
+  res.status(200).json(response);
 });
 
 // Rota de exemplo de status/saúde
